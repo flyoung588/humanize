@@ -403,3 +403,15 @@ def test_intword_unit_has_no_format_placeholder(locale: str) -> None:
         pytest.skip("Generate .mo with scripts/generate-translation-binaries.sh")
     finally:
         humanize.i18n.deactivate()
+
+
+def test_intcomma_large_integer_precision_i18n() -> None:
+    try:
+        humanize.i18n.activate("de_DE")
+    except FileNotFoundError:
+        pytest.skip("German translation is not installed")
+    try:
+        expected = "10" + ".000" * 132 + ".123,00"
+        assert humanize.intcomma(str(10**400 + 123), 2) == expected
+    finally:
+        humanize.i18n.deactivate()

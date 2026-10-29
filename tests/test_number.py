@@ -396,3 +396,26 @@ def test_whole_numbers_outside_float_range():
     assert "Inf" not in humanize.intword(huge)
     assert humanize.clamp(huge) == str(huge)
     assert "10" in humanize.metric(huge)
+
+
+@pytest.mark.parametrize("magnitude", [2**53 + 1, 10**400 + 123])
+@pytest.mark.parametrize("sign", [1, -1])
+@pytest.mark.parametrize("as_string", [False, True])
+@pytest.mark.parametrize("ndigits", [0, 2])
+def test_intcomma_integer_precision_is_exact(
+    magnitude: int, sign: int, as_string: bool, ndigits: int
+) -> None:
+    from decimal import localcontext
+
+    value = sign * magnitude
+    expected = f"{value:,}" + (".00" if ndigits else "")
+    with localcontext() as context:
+        context.prec = 2
+        assert (
+            humanize.intcomma(str(value) if as_string else value, ndigits) == expected
+        )
+
+
+def test_intcomma_large_integer_invalid_precision() -> None:
+    with pytest.raises(ValueError, match="[Pp]recision|[Ff]ormat"):
+        humanize.intcomma(10**400 + 123, -1)

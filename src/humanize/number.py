@@ -189,6 +189,8 @@ def intcomma(value: NumberOrString, ndigits: int | None = None) -> str:
         '14,308.4'
         >>> intcomma("14308.40", 1)
         '14,308.4'
+        >>> intcomma(9_007_199_254_740_993, 2)
+        '9,007,199,254,740,993.00'
         >>> intcomma(None)
         'None'
 
@@ -222,7 +224,13 @@ def intcomma(value: NumberOrString, ndigits: int | None = None) -> str:
         return str(value)
 
     if ndigits is not None:
-        result = f"{value:,.{ndigits}f}"
+        if isinstance(value, int):
+            from decimal import Decimal
+
+            # Integer fixed-point formatting otherwise converts through float.
+            result = f"{Decimal(value):,.{ndigits}f}"
+        else:
+            result = f"{value:,.{ndigits}f}"
     else:
         result = f"{value:,}"
     if thousands_sep != "," or decimal_sep != ".":
