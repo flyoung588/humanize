@@ -224,7 +224,11 @@ def intcomma(value: NumberOrString, ndigits: int | None = None) -> str:
         return str(value)
 
     if ndigits is not None:
-        if isinstance(value, int):
+        if (
+            isinstance(value, int)
+            and type(value).__format__ is int.__format__
+            and type(value).__float__ is int.__float__
+        ):
             from decimal import Decimal
 
             # Integer fixed-point formatting otherwise converts through float.
